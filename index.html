@@ -174,7 +174,7 @@
       <button id="recordBtn" title="Start / stop live transcription">&#127908;</button>
       <div class="rec-status">
         <div class="state">Status: <span id="state">Idle</span> <span id="timer"></span></div>
-        <div class="hint">Say <b>"comma"</b>, <b>"full stop"</b>, <b>"next line"</b> — they become , . and line breaks.<br>Say <b>"bold"</b> / <b>"italic"</b> / <b>"underline"</b> / <b>"highlight"</b> to turn formatting on, <b>"bold off"</b> to stop it.</div>
+        <div class="hint">Say <b>"comma"</b>, <b>"full stop"</b>, <b>"next line"</b> — they become , . and line breaks.<br>Say <b>"bold"</b> / <b>"italic"</b> / <b>"underline"</b> / <b>"highlight"</b> to format — <b>"bold off"</b> or just <b>"stop"</b> to go back to normal.</div>
       </div>
       <select id="langSel" title="Dictation language (Deepgram flux supports these 10)">
         <option value="multi">🌐 Auto-detect</option>
@@ -300,13 +300,13 @@ const GAP = "[\\s.,;:!?]*";
 const PUNCT = "[ \\t]*[.,;:]?";
 const FMT_CMDS = [
   { key: "bold",      on: false, re: new RegExp("\\b(?:bold" + GAP + "(?:off|out|done|stop|end)|off" + GAP + "bold|stop" + GAP + "bold|un" + GAP + "bold|no" + GAP + "more" + GAP + "bold|normal" + GAP + "bold)\\b" + PUNCT, "gi") },
-  { key: "bold",      on: true,  re: new RegExp("\\b(?:bold" + GAP + "(?:on)|make" + GAP + "(?:it)?(?:" + GAP + "bold)|bold)\\b" + PUNCT, "gi") },
+  { key: "bold",      on: true,  re: new RegExp("\\b(?:bold" + GAP + "(?:on)?|on" + GAP + "bold|make" + GAP + "(?:it" + GAP + ")?bold)\\b" + PUNCT, "gi") },
   { key: "italic",    on: false, re: new RegExp("\\b(?:italics?" + GAP + "(?:off|out|done|stop|end)|off" + GAP + "italics?|stop" + GAP + "italics?|un" + GAP + "italics?|no" + GAP + "more" + GAP + "italics?|normal" + GAP + "italics?)\\b" + PUNCT, "gi") },
-  { key: "italic",    on: true,  re: new RegExp("\\bitalics?" + GAP + "(?:on)?\\b" + PUNCT, "gi") },
+  { key: "italic",    on: true,  re: new RegExp("\\b(?:italics?" + GAP + "(?:on)?|on" + GAP + "italics?)\\b" + PUNCT, "gi") },
   { key: "underline", on: false, re: new RegExp("\\b(?:underlines?" + GAP + "(?:off|out|done|stop|end)|off" + GAP + "underlines?|stop" + GAP + "underlines?|un" + GAP + "underlines?|no" + GAP + "more" + GAP + "underlines?|normal" + GAP + "underlines?)\\b" + PUNCT, "gi") },
-  { key: "underline", on: true,  re: new RegExp("\\bunderlines?" + GAP + "(?:on)?\\b" + PUNCT, "gi") },
+  { key: "underline", on: true,  re: new RegExp("\\b(?:underlines?" + GAP + "(?:on)?|on" + GAP + "underlines?|(?:on|one)\\b" + GAP + "lines?)\\b" + PUNCT, "gi") },
   { key: "highlight", on: false, re: new RegExp("\\b(?:highlights?" + GAP + "(?:off|out|done|stop|end)|off" + GAP + "highlights?|stop" + GAP + "highlights?|un" + GAP + "highlights?|no" + GAP + "more" + GAP + "highlights?|normal" + GAP + "highlights?)\\b" + PUNCT, "gi") },
-  { key: "highlight", on: true,  re: new RegExp("\\bhighlights?" + GAP + "(?:on)?\\b" + PUNCT, "gi") },
+  { key: "highlight", on: true,  re: new RegExp("\\b(?:highlights?" + GAP + "(?:on)?|on" + GAP + "highlights?)\\b" + PUNCT, "gi") },
 ];
 
 let voiceFmt = { bold: false, italic: false, underline: false, highlight: false };
@@ -318,10 +318,19 @@ function extractVoiceFormat(text, apply) {
   FMT_CMDS.forEach(c => {
     t = t.replace(c.re, () => `\u0000${FMT_KEYS.indexOf(c.key)}:${c.on ? 1 : 0}\u0000`);
   });
+  if (st.bold || st.italic || st.underline || st.highlight) {
+    // bare "stop" / "off" / "normal" (optionally "and stop") at the end of the
+    // utterance clears all active voice formatting
+    t = t.replace(/(?:(?:and|then)[\s.,;:!?]*)*(?:stop|off|normal)[\s.,;:!?]*$/i,
+      () => `\u00009:0\u0000`);
+  }
   const parts = t.split(/\u0000(\d):(\d)\u0000/);
   const segs = [];
   for (let i = 0; i < parts.length; i += 3) {
-    if (i > 0) st[FMT_KEYS[+parts[i - 2]]] = parts[i - 1] === "1";
+    if (i > 0) {
+      if (parts[i - 2] === "9") FMT_KEYS.forEach(k => st[k] = false);
+      else st[FMT_KEYS[+parts[i - 2]]] = parts[i - 1] === "1";
+    }
     const txt = parts[i].replace(/[ \t]{2,}/g, " ").replace(/[ \t]+([.,;:!?])/g, "$1");
     if (txt.trim()) segs.push({ text: txt, flags: Object.assign({}, st) });
   }
