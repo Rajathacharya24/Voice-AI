@@ -497,6 +497,7 @@ async function startRecording() {
           if (msg.utterance_end) return;
           eotSeen = true;
           const t = cleanDictation(msg.transcript);
+          syncVoiceFmt(msg.transcript);
           if (t.trim() && !noteEndsWith(t)) {
             appendToNote(msg.transcript);
             pendingFinal = true;
@@ -563,6 +564,7 @@ function stopRecording(silent) {
       clearInterval(sil);
       if (!eotSeen && lastLive.trim()) {
         const t = cleanDictation(lastLive);
+        syncVoiceFmt(lastLive);
         if (t.trim() && !noteEndsWith(t)) {
           appendToNote(lastLive);
           pendingFinal = true;
