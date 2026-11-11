@@ -347,6 +347,8 @@ function styledNode(text, flags) {
 }
 
 function appendText(para, text, flags) {
+  const empty = para.textContent === "";
+  if (empty && /^[ \t]/.test(text)) text = text.replace(/^[ \t]+/, "");
   const tail = para.textContent.slice(-1);
   if (/\s/.test(tail) && /^\s/.test(text)) text = text.replace(/^[ \t]+/, "");
   if (!text) return;
