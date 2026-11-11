@@ -296,15 +296,16 @@ function noteEndsWith(t) {
 }
 
 const FMT_KEYS = ["bold", "italic", "underline", "highlight"];
+const FMT_PUNCT = "[ \\t]*[.,;:]?";
 const FMT_CMDS = [
-  { key: "bold",      on: false, re: /\b(?:bold\s*(?:off|out|done|stop|end)|stop\s+bold|un\s*bold|no\s+more\s+bold|normal\s+bold)\b/gi },
-  { key: "bold",      on: true,  re: /\bbold\b/gi },
-  { key: "italic",    on: false, re: /\b(?:italics?\s*(?:off|out|done|stop|end)|stop\s+italics?|un\s*italic|no\s+more\s+italics?)\b/gi },
-  { key: "italic",    on: true,  re: /\bitalics?\b/gi },
-  { key: "underline", on: false, re: /\b(?:underlines?\s*(?:off|out|done|stop|end)|stop\s+underlines?|un\s*underline|no\s+more\s+underlines?)\b/gi },
-  { key: "underline", on: true,  re: /\bunderlines?\b/gi },
-  { key: "highlight", on: false, re: /\b(?:highlights?\s*(?:off|out|done|stop|end)|stop\s+highlights?|un\s*highlight|no\s+more\s+highlights?)\b/gi },
-  { key: "highlight", on: true,  re: /\bhighlights?\b/gi },
+  { key: "bold",      on: false, re: new RegExp("\\b(?:bold\\s*(?:off|out|done|stop|end)|stop\\s+bold|un\\s*bold|no\\s+more\\s+bold|normal\\s+bold)\\b" + FMT_PUNCT, "gi") },
+  { key: "bold",      on: true,  re: new RegExp("\\b(?:bold(?:\\s+on)?|make\\s+(?:it\\s+)?bold)\\b" + FMT_PUNCT, "gi") },
+  { key: "italic",    on: false, re: new RegExp("\\b(?:italics?\\s*(?:off|out|done|stop|end)|stop\\s+italics?|un\\s*italic|no\\s+more\\s+italics?)\\b" + FMT_PUNCT, "gi") },
+  { key: "italic",    on: true,  re: new RegExp("\\bitalics?(?:\\s+on)?\\b" + FMT_PUNCT, "gi") },
+  { key: "underline", on: false, re: new RegExp("\\b(?:underlines?\\s*(?:off|out|done|stop|end)|stop\\s+underlines?|un\\s*underline|no\\s+more\\s+underlines?)\\b" + FMT_PUNCT, "gi") },
+  { key: "underline", on: true,  re: new RegExp("\\bunderlines?(?:\\s+on)?\\b" + FMT_PUNCT, "gi") },
+  { key: "highlight", on: false, re: new RegExp("\\b(?:highlights?\\s*(?:off|out|done|stop|end)|stop\\s+highlights?|un\\s*highlight|no\\s+more\\s+highlights?)\\b" + FMT_PUNCT, "gi") },
+  { key: "highlight", on: true,  re: new RegExp("\\bhighlights?(?:\\s+on)?\\b" + FMT_PUNCT, "gi") },
 ];
 
 let voiceFmt = { bold: false, italic: false, underline: false, highlight: false };
@@ -330,6 +331,10 @@ function cleanDictation(raw) {
   const fmt = formatDictation(raw);
   const segs = extractVoiceFormat(fmt, false);
   return segs.map(s => s.text).join(" ").replace(/[ \t]*\n[ \t]*/g, " ").replace(/\s{2,}/g, " ").trim();
+}
+
+function syncVoiceFmt(raw) {
+  extractVoiceFormat(formatDictation(raw), true);
 }
 
 function styledNode(text, flags) {
