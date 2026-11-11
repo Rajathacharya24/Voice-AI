@@ -379,6 +379,11 @@ function appendToNote(raw) {
   if (para && para.tagName === "P" && note.contains(para) &&
       (voiceFmt.bold || voiceFmt.italic || voiceFmt.underline || voiceFmt.highlight)) {
     openPara = para;
+  } else if (voiceFmt.bold || voiceFmt.italic || voiceFmt.underline || voiceFmt.highlight) {
+    // pure-command utterance ("bold" with no text): continue into the last existing paragraph
+    let last = note.lastElementChild;
+    while (last && last.tagName !== "P") last = last.previousElementSibling;
+    openPara = (last && note.contains(last)) ? last : null;
   } else {
     openPara = null;
   }
@@ -474,6 +479,7 @@ async function startRecording() {
           const raw = (msg.transcript && msg.transcript.trim()) ? msg.transcript : lastLive;
           const t = cleanDictation(raw);
           lastTurnAppended = false;
+          syncVoiceFmt(raw);
           if (t.trim() && !noteEndsWith(t)) {
             appendToNote(raw);
             pendingFinal = true;
