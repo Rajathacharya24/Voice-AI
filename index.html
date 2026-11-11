@@ -296,16 +296,17 @@ function noteEndsWith(t) {
 }
 
 const FMT_KEYS = ["bold", "italic", "underline", "highlight"];
-const FMT_PUNCT = "[ \\t]*[.,;:]?";
+const GAP = "[\\s.,;:!?]*";
+const PUNCT = "[ \\t]*[.,;:]?";
 const FMT_CMDS = [
-  { key: "bold",      on: false, re: new RegExp("\\b(?:bold\\s*(?:off|out|done|stop|end)|stop\\s+bold|un\\s*bold|no\\s+more\\s+bold|normal\\s+bold)\\b" + FMT_PUNCT, "gi") },
-  { key: "bold",      on: true,  re: new RegExp("\\b(?:bold(?:\\s+on)?|make\\s+(?:it\\s+)?bold)\\b" + FMT_PUNCT, "gi") },
-  { key: "italic",    on: false, re: new RegExp("\\b(?:italics?\\s*(?:off|out|done|stop|end)|stop\\s+italics?|un\\s*italic|no\\s+more\\s+italics?)\\b" + FMT_PUNCT, "gi") },
-  { key: "italic",    on: true,  re: new RegExp("\\bitalics?(?:\\s+on)?\\b" + FMT_PUNCT, "gi") },
-  { key: "underline", on: false, re: new RegExp("\\b(?:underlines?\\s*(?:off|out|done|stop|end)|stop\\s+underlines?|un\\s*underline|no\\s+more\\s+underlines?)\\b" + FMT_PUNCT, "gi") },
-  { key: "underline", on: true,  re: new RegExp("\\bunderlines?(?:\\s+on)?\\b" + FMT_PUNCT, "gi") },
-  { key: "highlight", on: false, re: new RegExp("\\b(?:highlights?\\s*(?:off|out|done|stop|end)|stop\\s+highlights?|un\\s*highlight|no\\s+more\\s+highlights?)\\b" + FMT_PUNCT, "gi") },
-  { key: "highlight", on: true,  re: new RegExp("\\bhighlights?(?:\\s+on)?\\b" + FMT_PUNCT, "gi") },
+  { key: "bold",      on: false, re: new RegExp("\\b(?:bold" + GAP + "(?:off|out|done|stop|end)|off" + GAP + "bold|stop" + GAP + "bold|un" + GAP + "bold|no" + GAP + "more" + GAP + "bold|normal" + GAP + "bold)\\b" + PUNCT, "gi") },
+  { key: "bold",      on: true,  re: new RegExp("\\b(?:bold" + GAP + "(?:on)|make" + GAP + "(?:it)?(?:" + GAP + "bold)|bold)\\b" + PUNCT, "gi") },
+  { key: "italic",    on: false, re: new RegExp("\\b(?:italics?" + GAP + "(?:off|out|done|stop|end)|off" + GAP + "italics?|stop" + GAP + "italics?|un" + GAP + "italics?|no" + GAP + "more" + GAP + "italics?|normal" + GAP + "italics?)\\b" + PUNCT, "gi") },
+  { key: "italic",    on: true,  re: new RegExp("\\bitalics?" + GAP + "(?:on)?\\b" + PUNCT, "gi") },
+  { key: "underline", on: false, re: new RegExp("\\b(?:underlines?" + GAP + "(?:off|out|done|stop|end)|off" + GAP + "underlines?|stop" + GAP + "underlines?|un" + GAP + "underlines?|no" + GAP + "more" + GAP + "underlines?|normal" + GAP + "underlines?)\\b" + PUNCT, "gi") },
+  { key: "underline", on: true,  re: new RegExp("\\bunderlines?" + GAP + "(?:on)?\\b" + PUNCT, "gi") },
+  { key: "highlight", on: false, re: new RegExp("\\b(?:highlights?" + GAP + "(?:off|out|done|stop|end)|off" + GAP + "highlights?|stop" + GAP + "highlights?|un" + GAP + "highlights?|no" + GAP + "more" + GAP + "highlights?|normal" + GAP + "highlights?)\\b" + PUNCT, "gi") },
+  { key: "highlight", on: true,  re: new RegExp("\\bhighlights?" + GAP + "(?:on)?\\b" + PUNCT, "gi") },
 ];
 
 let voiceFmt = { bold: false, italic: false, underline: false, highlight: false };
