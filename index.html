@@ -81,19 +81,72 @@
     text-overflow: ellipsis;
   }
   label { font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 5px; display: block; text-transform: uppercase; letter-spacing: .03em; }
-  #note {
-    width: 100%;
-    min-height: 460px;
-    border: 1px solid #cbd5e1;
+  .editor-wrap {
+    resize: vertical;
+    overflow: hidden;
+    min-height: 500px;
+    max-height: 90vh;
     border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+  }
+  .toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 3px;
+    border: 1px solid #cbd5e1;
+    border-bottom: none;
+    border-radius: 8px 8px 0 0;
+    background: #f8fafc;
+    padding: 6px;
+    flex-shrink: 0;
+  }
+  .toolbar button {
+    min-width: 32px;
+    height: 32px;
+    border: 1px solid transparent;
+    background: transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #334155;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 7px;
+    font-family: inherit;
+  }
+  .toolbar button:hover { background: #e2e8f0; }
+  .toolbar button.on { background: #dbeafe; color: #0f4c81; border-color: #93c5fd; }
+  .toolbar .sep { width: 1px; align-self: stretch; background: #cbd5e1; margin: 3px 5px; }
+  .toolbar .b { font-weight: 700; }
+  .toolbar .i { font-style: italic; font-family: Georgia, serif; }
+  .toolbar .u { text-decoration: underline; }
+  .toolbar .s { text-decoration: line-through; }
+  .toolbar .mark { background: #fde047; padding: 0 3px; border-radius: 3px; }
+  #note {
+    flex: 1;
+    min-height: 200px;
+    border: 1px solid #cbd5e1;
+    border-radius: 0 0 8px 8px;
     padding: 14px 16px;
     font-size: 15px;
     font-family: inherit;
     line-height: 1.6;
-    resize: vertical;
     background: #fff;
+    overflow-y: auto;
+    outline: none;
   }
   #note:focus { outline: 2px solid #0f4c81; outline-offset: -1px; }
+  #note p { margin: 0 0 10px; }
+  #note h1, #note h2, #note h3, #note h4 { margin: 14px 0 8px; }
+  #note h1 { font-size: 22px; }
+  #note h2 { font-size: 18px; }
+  #note h3 { font-size: 16px; }
+  #note ul, #note ol { margin: 0 0 10px 24px; }
+  #note mark { background: #fde047; border-radius: 3px; padding: 0 2px; }
+  #note:empty::before { content: attr(data-placeholder); color: #94a3b8; }
   #status { font-size: 13px; color: #0f4c81; min-height: 18px; margin: 8px 0; }
   #status.error { color: #dc2626; }
   .actions { display: flex; gap: 10px; }
@@ -121,7 +174,7 @@
       <button id="recordBtn" title="Start / stop live transcription">&#127908;</button>
       <div class="rec-status">
         <div class="state">Status: <span id="state">Idle</span> <span id="timer"></span></div>
-        <div class="hint">Say <b>"comma"</b>, <b>"full stop"</b>, <b>"next line"</b> — they become , . and line breaks.</div>
+        <div class="hint">Say <b>"comma"</b>, <b>"full stop"</b>, <b>"next line"</b> — they become , . and line breaks.<br>Say <b>"bold"</b> / <b>"italic"</b> / <b>"underline"</b> / <b>"highlight"</b> to turn formatting on, <b>"bold off"</b> to stop it.</div>
       </div>
       <select id="langSel" title="Dictation language (Deepgram flux supports these 10)">
         <option value="multi">🌐 Auto-detect</option>
@@ -140,12 +193,35 @@
 
     <div id="live"></div>
     <label for="note">Clinical Note</label>
-    <textarea id="note" spellcheck="false"></textarea>
+    <div class="editor-wrap">
+      <div class="toolbar" id="toolbar">
+      <button data-cmd="bold" class="b" title="Bold (Ctrl+B)">B</button>
+      <button data-cmd="italic" class="i" title="Italic (Ctrl+I)">I</button>
+      <button data-cmd="underline" class="u" title="Underline (Ctrl+U)">U</button>
+      <button data-cmd="strikeThrough" class="s" title="Strikethrough">S</button>
+      <div class="sep"></div>
+      <button data-cmd="formatBlock" data-val="p" title="Paragraph">&#182;</button>
+      <button data-cmd="formatBlock" data-val="h1" title="Heading 1">H1</button>
+      <button data-cmd="formatBlock" data-val="h2" title="Heading 2">H2</button>
+      <button data-cmd="formatBlock" data-val="h3" title="Heading 3">H3</button>
+      <div class="sep"></div>
+      <button data-cmd="insertUnorderedList" title="Bulleted list">&bull; &#9776;</button>
+      <button data-cmd="insertOrderedList" title="Numbered list">1. &#9776;</button>
+      <div class="sep"></div>
+      <button data-cmd="hiliteColor" data-val="#fde047" class="mark" title="Highlight">abc</button>
+      <button data-cmd="removeFormat" title="Clear formatting">&#8855; fmt</button>
+      <div class="sep"></div>
+      <button data-cmd="undo" title="Undo (Ctrl+Z)">&#8630;</button>
+      <button data-cmd="redo" title="Redo (Ctrl+Y)">&#8631;</button>
+    </div>
+    <div id="note" contenteditable="true" spellcheck="false" data-placeholder="Start dictating or type here — the note is now rich text."></div>
+    </div>
 
     <div id="status"></div>
     <div class="actions">
       <button class="secondary" id="clearBtn">Clear Note</button>
       <button class="secondary" id="downloadBtn">Download Note (.txt)</button>
+      <button class="secondary" id="downloadHtmlBtn">Download Note (.html)</button>
     </div>
   </div>
 </div>
@@ -170,6 +246,9 @@ let lastLive = "";
 let eotSeen = false;
 let lastTurnIndex = -1;
 let lastTurnAppended = false;
+
+document.execCommand("defaultParagraphSeparator", false, "p");
+document.querySelector('label[for="note"]').addEventListener("click", () => note.focus());
 
 const langSel = document.getElementById("langSel");
 langSel.value = localStorage.getItem("dictationLang") || "multi";
@@ -207,16 +286,128 @@ function formatDictation(text) {
   return t;
 }
 
-function appendToNote(t) {
-  const cur = note.value.replace(/[ \t]+$/, "");
-  if (t.startsWith("\n")) {
-    note.value = cur.replace(/\n+$/, "") + t;
-  } else if (cur) {
-    note.value = cur + (cur.endsWith("\n") ? "" : " ") + t;
-  } else {
-    note.value = t;
-  }
+function noteText() {
+  return note.innerText || "";
 }
+
+function noteEndsWith(t) {
+  const norm = s => s.replace(/\s+/g, " ").trim().toLowerCase();
+  return norm(noteText()).endsWith(norm(t));
+}
+
+const FMT_KEYS = ["bold", "italic", "underline", "highlight"];
+const FMT_CMDS = [
+  { key: "bold",      on: false, re: /\b(?:bold\s*(?:off|out|done|stop|end)|stop\s+bold|un\s*bold|no\s+more\s+bold|normal\s+bold)\b/gi },
+  { key: "bold",      on: true,  re: /\bbold\b/gi },
+  { key: "italic",    on: false, re: /\b(?:italics?\s*(?:off|out|done|stop|end)|stop\s+italics?|un\s*italic|no\s+more\s+italics?)\b/gi },
+  { key: "italic",    on: true,  re: /\bitalics?\b/gi },
+  { key: "underline", on: false, re: /\b(?:underlines?\s*(?:off|out|done|stop|end)|stop\s+underlines?|un\s*underline|no\s+more\s+underlines?)\b/gi },
+  { key: "underline", on: true,  re: /\bunderlines?\b/gi },
+  { key: "highlight", on: false, re: /\b(?:highlights?\s*(?:off|out|done|stop|end)|stop\s+highlights?|un\s*highlight|no\s+more\s+highlights?)\b/gi },
+  { key: "highlight", on: true,  re: /\bhighlights?\b/gi },
+];
+
+let voiceFmt = { bold: false, italic: false, underline: false, highlight: false };
+let openPara = null;
+
+function extractVoiceFormat(text, apply) {
+  const st = apply ? voiceFmt : Object.assign({}, voiceFmt);
+  let t = text;
+  FMT_CMDS.forEach(c => {
+    t = t.replace(c.re, () => `\u0000${FMT_KEYS.indexOf(c.key)}:${c.on ? 1 : 0}\u0000`);
+  });
+  const parts = t.split(/\u0000(\d):(\d)\u0000/);
+  const segs = [];
+  for (let i = 0; i < parts.length; i += 3) {
+    if (i > 0) st[FMT_KEYS[+parts[i - 2]]] = parts[i - 1] === "1";
+    const txt = parts[i].replace(/[ \t]{2,}/g, " ").replace(/[ \t]+([.,;:!?])/g, "$1");
+    if (txt.trim()) segs.push({ text: txt, flags: Object.assign({}, st) });
+  }
+  return segs;
+}
+
+function cleanDictation(raw) {
+  const fmt = formatDictation(raw);
+  const segs = extractVoiceFormat(fmt, false);
+  return segs.map(s => s.text).join(" ").replace(/[ \t]*\n[ \t]*/g, " ").replace(/\s{2,}/g, " ").trim();
+}
+
+function styledNode(text, flags) {
+  let node = document.createTextNode(text);
+  if (flags.highlight) { const m = document.createElement("mark"); m.appendChild(node); node = m; }
+  if (flags.underline) { const u = document.createElement("u"); u.appendChild(node); node = u; }
+  if (flags.italic)    { const i = document.createElement("i");    i.appendChild(node); node = i; }
+  if (flags.bold)      { const b = document.createElement("b");    b.appendChild(node); node = b; }
+  return node;
+}
+
+function appendText(para, text, flags) {
+  const tail = para.textContent.slice(-1);
+  if (/\s/.test(tail) && /^\s/.test(text)) text = text.replace(/^[ \t]+/, "");
+  if (!text) return;
+  para.appendChild(styledNode(text, flags));
+}
+
+function appendToNote(raw) {
+  const fmt = formatDictation(raw);
+  const segs = extractVoiceFormat(fmt, true);
+  while (note.lastElementChild && /^(P|DIV|H\d)$/.test(note.lastElementChild.tagName) && !note.lastElementChild.textContent.trim()) {
+    note.lastElementChild.remove();
+  }
+  let para = (openPara && note.contains(openPara)) ? openPara : null;
+  segs.forEach(seg => {
+    seg.text.replace(/\n{2,}/g, "\u2029").replace(/\n/g, "\u2028").split(/([\u2028\u2029])/).forEach(part => {
+      if (part === "\u2029") {
+        para = document.createElement("p");
+        note.appendChild(para);
+      } else if (part === "\u2028") {
+        if (!para || para.tagName !== "P") { para = document.createElement("p"); note.appendChild(para); }
+        else para.appendChild(document.createElement("br"));
+      } else if (part.trim()) {
+        if (!para) { para = document.createElement("p"); note.appendChild(para); }
+        appendText(para, part, seg.flags);
+      }
+    });
+  });
+  if (para && para.tagName === "P" && note.contains(para) &&
+      (voiceFmt.bold || voiceFmt.italic || voiceFmt.underline || voiceFmt.highlight)) {
+    openPara = para;
+  } else {
+    openPara = null;
+  }
+  note.scrollTop = note.scrollHeight;
+}
+
+function exec(cmd, val) {
+  note.focus();
+  document.execCommand("defaultParagraphSeparator", false, "p");
+  document.execCommand(cmd, false, val || null);
+  updateToolbarState();
+}
+
+function updateToolbarState() {
+  const sel = window.getSelection();
+  if (!sel || !note.contains(sel.anchorNode)) return;
+  document.querySelectorAll("#toolbar button[data-cmd]").forEach(btn => {
+    const { cmd } = btn.dataset;
+    let on = false;
+    try {
+      if (cmd === "formatBlock") {
+        const block = document.queryCommandValue("formatBlock").toLowerCase();
+        on = block === (btn.dataset.val || "p");
+      } else {
+        on = document.queryCommandState(cmd);
+      }
+    } catch {}
+    btn.classList.toggle("on", on);
+  });
+}
+
+document.querySelectorAll("#toolbar button[data-cmd]").forEach(btn => {
+  btn.addEventListener("mousedown", e => e.preventDefault());
+  btn.addEventListener("click", () => exec(btn.dataset.cmd, btn.dataset.val));
+});
+document.addEventListener("selectionchange", updateToolbarState);
 
 recordBtn.addEventListener("click", () => {
   if (ws) stopRecording();
@@ -262,7 +453,7 @@ async function startRecording() {
       if (msg.event) {
         if (msg.event === "Update") {
           lastLive = msg.transcript || "";
-          liveEl.textContent = lastLive;
+          liveEl.textContent = cleanDictation(lastLive);
         } else if (msg.event === "EndOfTurn") {
           eotSeen = true;
           // flux can fire EndOfTurn more than once for the same turn
@@ -274,10 +465,10 @@ async function startRecording() {
             return;
           }
           const raw = (msg.transcript && msg.transcript.trim()) ? msg.transcript : lastLive;
-          const t = formatDictation(raw);
+          const t = cleanDictation(raw);
           lastTurnAppended = false;
-          if (t.trim() && !note.value.trimEnd().toLowerCase().endsWith(t.trim().toLowerCase())) {
-            appendToNote(t);
+          if (t.trim() && !noteEndsWith(t)) {
+            appendToNote(raw);
             pendingFinal = true;
             lastTurnAppended = true;
           }
@@ -292,16 +483,16 @@ async function startRecording() {
         if (msg.is_final) {
           if (msg.utterance_end) return;
           eotSeen = true;
-          const t = formatDictation(msg.transcript);
-          if (t.trim() && !note.value.trimEnd().toLowerCase().endsWith(t.trim().toLowerCase())) {
-            appendToNote(t);
+          const t = cleanDictation(msg.transcript);
+          if (t.trim() && !noteEndsWith(t)) {
+            appendToNote(msg.transcript);
             pendingFinal = true;
           }
           lastLive = "";
           liveEl.textContent = "";
         } else {
           lastLive = msg.transcript;
-          liveEl.textContent = formatDictation(msg.transcript);
+          liveEl.textContent = cleanDictation(msg.transcript);
         }
       }
     };
@@ -358,9 +549,9 @@ function stopRecording(silent) {
     stopTimers.push(setTimeout(() => {
       clearInterval(sil);
       if (!eotSeen && lastLive.trim()) {
-        const t = formatDictation(lastLive);
-        if (t.trim() && !note.value.trimEnd().toLowerCase().endsWith(t.trim().toLowerCase())) {
-          appendToNote(t);
+        const t = cleanDictation(lastLive);
+        if (t.trim() && !noteEndsWith(t)) {
+          appendToNote(lastLive);
           pendingFinal = true;
         }
       }
@@ -393,14 +584,22 @@ function stopCleanup() {
 }
 
 document.getElementById("clearBtn").addEventListener("click", () => {
-  note.value = "";
+  note.innerHTML = "";
   setStatus("Note cleared.");
 });
 
 document.getElementById("downloadBtn").addEventListener("click", () => {
   const a = document.createElement("a");
-  a.href = URL.createObjectURL(new Blob([note.value], { type: "text/plain" }));
+  a.href = URL.createObjectURL(new Blob([noteText()], { type: "text/plain" }));
   a.download = "clinical-note.txt";
+  a.click();
+});
+
+document.getElementById("downloadHtmlBtn").addEventListener("click", () => {
+  const doc = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Clinical Note</title></head><body>${note.innerHTML}</body></html>`;
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([doc], { type: "text/html" }));
+  a.download = "clinical-note.html";
   a.click();
 });
 </script>

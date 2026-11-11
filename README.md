@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Clinical Note — Live Speech-to-Text (Telnyx · Deepgram Flux)
 
 A minimal web app that turns your speech into a clinical note **live**.
@@ -195,3 +196,6 @@ most accurate Deepgram model per language (verified by testing):
 - This is a **testing/demo** tool — not a certified medical records system.
 - For production, serve over HTTPS (browsers require it for mic access on
   non-localhost domains) and add authentication.
+=======
+# Voice-AI
+>>>>>>> 3c9bc02f796efdfba51813764a436e448d7835bf
