@@ -176,19 +176,6 @@ most accurate Deepgram model per language (verified by testing):
 
 ---
 
-## Troubleshooting
-
-| Problem | Fix |
-|---|---|
-| "Microphone access denied" | Allow mic in browser; use `localhost` or HTTPS |
-| Nothing appears while speaking | Check the mic is not muted; speak continuously until a turn completes |
-| `EADDRINUSE: port 3000` | Stop the old server: `fuser -k 3000/tcp`, then `node server.js` |
-| "TELNYX_API_KEY is not set" | Put your key in `.env` and restart the server |
-| Telnyx auth error (10009) | API key is wrong/revoked |
-| Telnyx feature error (10038) | Enable the **AI / Speech-to-Text** feature in the Telnyx portal |
-| Flux error 40006 | Audio format not supported by flux — this app already sends linear16, which works |
-
----
 
 ## Notes
 
