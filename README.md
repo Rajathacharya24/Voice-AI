@@ -161,28 +161,3 @@ Flux emits turn-based events (not `{transcript, is_final}`):
 
 ---
 
-## Supported languages & accuracy routing
-
-The dropdown offers **Auto-detect** plus 10 languages. The server picks the
-most accurate Deepgram model per language (verified by testing):
-
-| You select | Model | Why |
-|---|---|---|
-| English | `nova-2` (en-US) | Hard-locked English — cannot output Hindi script |
-| Spanish, French, German, Italian, Dutch, Portuguese | `nova-3` | Most accurate: *"El paciente tiene fiebre y tos."* — near perfect |
-| Hindi, Russian, Japanese, 🌐 Auto-detect | `flux-multi` | Only model that handles them / code-switching |
-
-> Deep explanation: **[MULTILANGUAGE.md](MULTILANGUAGE.md)**
-
----
-
-
-## Notes
-
-- Audio never leaves your machine except to Telnyx for transcription.
-- This is a **testing/demo** tool — not a certified medical records system.
-- For production, serve over HTTPS (browsers require it for mic access on
-  non-localhost domains) and add authentication.
-=======
-# Voice-AI
->>>>>>> 3c9bc02f796efdfba51813764a436e448d7835bf
